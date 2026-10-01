@@ -55,7 +55,7 @@ The system is organized according to a layered IoT architecture, separating appl
 
 The monitoring process follows these steps:
 
-1. The ESP8266 reads sensor measurements every 10 seconds:
+1. The ESP8266 reads sensor measurements every 2 seconds:
 
    * Temperature and humidity using DHT11
    * Soil moisture using analog input
