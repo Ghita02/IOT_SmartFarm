@@ -627,6 +627,7 @@ function updateKpi(id, val, unit, level) {
   document.getElementById('kpi-' + id).innerHTML = val + '<span class="kpi-unit">' + unit + '</span>';
   document.getElementById('alert-' + id).style.display = level !== 'ok' ? 'block' : 'none';
 }
+//achieve reliability,dashboard doesn't break if bakend stops working
 
 async function fetchLatest() {
   try {
@@ -788,8 +789,11 @@ function generateDemoHistory() {
   return rows;
 }
 
-function avg(arr) { return arr.length ? arr.reduce((a,b) => a+b, 0) / arr.length : 0; }
-
+//function avg(arr) { return arr.length ? arr.reduce((a,b) => a+b, 0) / arr.length : 0; }
+function avg(arr) {
+  const valid = arr.filter(v => typeof v === 'number' && !isNaN(v));
+  return valid.length ? valid.reduce((a,b) => a+b, 0) / valid.length : 0;
+}
 function renderHistory(rows) {
   if (!rows || !rows.length) return;
   const labels  = rows.map(r => {
@@ -797,11 +801,14 @@ function renderHistory(rows) {
     return d.toLocaleDateString([], { month:'short', day:'numeric' }) + ' ' +
            d.toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
   });
-  const temps  = rows.map(r => r.temperature);
-  const hums   = rows.map(r => r.humidity);
-  const moists = rows.map(r => r.moisture);
-  const lights = rows.map(r => r.light);
-
+  //const temps  = rows.map(r => r.temperature);
+  //const hums   = rows.map(r => r.humidity);
+  //const moists = rows.map(r => r.moisture);
+  //const lights = rows.map(r => r.light);
+  const temps  = rows.map(r => r.temperature ?? null);
+  const hums   = rows.map(r => r.humidity ?? null);
+  const moists = rows.map(r => r.moisture ?? null);
+  const lights = rows.map(r => r.light ?? null);
   [[hCharts.temp, temps],[hCharts.hum, hums],[hCharts.moisture, moists],[hCharts.light, lights]]
     .forEach(([chart, vals]) => {
       chart.data.labels = labels;

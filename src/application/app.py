@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, render_template, request
+from src.digital_twin import digital_twin
 import sqlite3
 from datetime import datetime, timedelta
 import os
@@ -83,6 +84,40 @@ def api_history():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/digital-twin')
+def api_digital_twin():
+    try:
+        conn = get_db()
+
+        for topic in [
+            'farm/temperature',
+            'farm/humidity',
+            'farm/moisture',
+            'farm/light'
+        ]:
+            row = conn.execute("""
+                SELECT value
+                FROM sensor_data
+                WHERE topic = ?
+                ORDER BY timestamp DESC, id DESC
+                LIMIT 1
+            """, (topic,)).fetchone()
+
+            if row:
+                digital_twin.process_measurement(topic, float(row['value']))
+
+        relay = conn.execute("""
+            SELECT state FROM relay_state WHERE id = 1
+        """).fetchone()
+
+        if relay:
+            digital_twin.process_relay_status(relay['state'])
+
+        conn.close()
+        return jsonify(digital_twin.get_state())
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/api/relay', methods=['POST'])
 def api_relay():
@@ -97,4 +132,5 @@ def api_relay():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    #app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0')

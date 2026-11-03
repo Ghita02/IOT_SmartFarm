@@ -1,38 +1,28 @@
-#import sqlite3
-
-#conn = sqlite3.connect("smartfarm.db")
-
-#cursor = conn.cursor()
-
-#cursor.execute("""
-#CREATE TABLE IF NOT EXISTS sensor_data (
-#    id INTEGER PRIMARY KEY AUTOINCREMENT,
- #   topic TEXT,
-  #  value TEXT,
-   # timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-
-#""")
-
-#conn.commit()
-#conn.close()
-
-#print("Database created successfully!")
+import os
 import sqlite3
 
-conn = sqlite3.connect('smartfarm.db')
-cursor = conn.cursor()
+ROOT_DIR = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..")
+)
 
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS sensor_data (
-        id          INTEGER PRIMARY KEY AUTOINCREMENT,
-        temperature REAL,
-        humidity    REAL,
-        moisture    REAL,
-        light       REAL,
-        timestamp   DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-''')
+DB_PATH = os.path.join(ROOT_DIR, "smartfarm.db")
 
-conn.commit()
-conn.close()
-print("Database created: smartfarm.db")
+with sqlite3.connect(DB_PATH) as conn:
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS sensor_data (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            topic TEXT NOT NULL,
+            value TEXT NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS relay_state (
+            id INTEGER PRIMARY KEY CHECK (id = 1),
+            state TEXT NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+print("Database initialized:", DB_PATH)

@@ -124,7 +124,7 @@ void setup() {
   Serial.println("RUNNING NEW CODE v2 + RELAY");
   Serial.println("\n=== Smart Farm Boot ===");
 
-  Wire.begin(D2, D1);
+  Wire.begin(D2, D1); //LCD  SDA , SCL
   lcd.init();
   lcd.backlight();
 
@@ -135,7 +135,7 @@ void setup() {
   digitalWrite(RELAY_PIN, LOW);  // start OFF
 
   setup_wifi();
-  client.setServer(mqtt_server, 1883);
+  client.setServer(mqtt_server, 1883);  //MQTT protocol's standard default port
   client.setCallback(callback);
 }
 
