@@ -1,0 +1,23 @@
+schemas:
+  common_fields:
+    profile:
+      name: str
+      component_type: str
+      unit: str
+
+  entity:
+    data:
+      value: float
+      status: str
+      last_updated: str
+
+  validations:
+    mandatory_fields:
+      profile:
+        - name
+        - component_type
+        - unit
+      data:
+        - value
+        - status
+        - last_updated

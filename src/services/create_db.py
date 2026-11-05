@@ -24,5 +24,13 @@ with sqlite3.connect(DB_PATH) as conn:
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     """)
-
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS actuator_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            command TEXT NOT NULL,
+            source TEXT NOT NULL,
+            moisture_value REAL,
+            timestamp TEXT NOT NULL
+        )
+    """)
 print("Database initialized:", DB_PATH)

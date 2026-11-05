@@ -1,0 +1,3 @@
+[submodule "external/InternetOfThings_Architecture_Database_lecture"]
+	path = external/InternetOfThings_Architecture_Database_lecture
+	url = https://github.com/Net4uCA/InternetOfThings_Architecture_Database_lecture.git

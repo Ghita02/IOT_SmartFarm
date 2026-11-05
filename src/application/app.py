@@ -3,7 +3,7 @@ from src.digital_twin import digital_twin
 import sqlite3
 from datetime import datetime, timedelta
 import os
-import paho.mqtt.publish as publish
+import paho.mqtt.client as mqtt
 
 # This makes Flask look for templates in the same folder as app.py
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -121,14 +121,40 @@ def api_digital_twin():
 
 @app.route('/api/relay', methods=['POST'])
 def api_relay():
-    command = request.json.get('command')  # "ON" or "OFF"
+    data = request.get_json(silent=True) or {}
+    command = data.get('command')
+
     if command not in ('ON', 'OFF'):
         return jsonify({'error': 'invalid command'}), 400
+
+    client = mqtt.Client()
+
     try:
-        publish.single('farm/relay/command', command, hostname=MQTT_BROKER)
-        return jsonify({'status': 'sent', 'command': command})
+        client.connect(MQTT_BROKER, 1883, 60)
+        client.loop_start()
+
+        info = client.publish(
+            'farm/relay/manual',
+            command,
+            qos=1
+        )
+        info.wait_for_publish(timeout=5)
+
+        if not info.is_published():
+            return jsonify({'error': 'MQTT publish timed out'}), 500
+
+        return jsonify({
+            'status': 'sent',
+            'command': command,
+            'source': 'manual'
+        })
+
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+    finally:
+        client.loop_stop()
+        client.disconnect()
 
 
 if __name__ == '__main__':
